@@ -2,6 +2,7 @@ const IMG_URL = 'https://image.tmdb.org/t/p/w185_and_h278_bestv2';
 const SERVER = 'https://api.themoviedb.org/3';
 const API_KEY = 'e2dfb7e2800e95f95b70a6e55e5f324e';
 
+
 // меню
 
 const leftMenu = document.querySelector('.left-menu'),
@@ -33,6 +34,7 @@ const loading = document.createElement('div');
 const  DBService = class {
     
     getData = async (url) => {
+        tvShows.append(loading);
         const res = await fetch(url);
         if (res.ok) {
             return res.json();
@@ -56,13 +58,28 @@ const  DBService = class {
     getTvShow = id => {
         return this.getData(`${SERVER}/tv/${id}?api_key=${API_KEY}&language=ru-RU`)
     }
+    getTopRated = () =>{
+        return this.getData(`${SERVER}/tv/top_rated?api_key=${API_KEY}&language=ru-RU`)
+    }
+
+    getPopular = () =>{
+        return this.getData(`${SERVER}/tv/popular?api_key=${API_KEY}&language=ru-RU`)
+    }
+    
+    getToday = () =>{
+        return this.getData(`${SERVER}/tv/airing_today?api_key=${API_KEY}&language=ru-RU`)
+    }
+
+    getWeek = () =>{
+        return this.getData(`${SERVER}/tv/on_the_air?api_key=${API_KEY}&language=ru-RU`)
+    }
     
 }
 
 
-
+const dbService = new DBService();
 // работа с ответом и разбор в цикле ФорИч
-const renderCard = response => {
+const renderCard = (response, target) => {
     tvShowsList.textContent = '';
     console.log (response);
 
@@ -72,7 +89,7 @@ const renderCard = response => {
         tvShowsHead.style.cssText ='red';
         return;
     }
-    tvShowsHead.textContent = 'Результат поиска:';
+    tvShowsHead.textContent = target ? target.textContent : 'Результат поиска:';
     tvShowsHead.style.color = 'green';
     loading.remove();
 
@@ -113,11 +130,8 @@ searchForm.addEventListener('submit', event => {
     event.preventDefault();
     const value = searchFormInput.value.trim();
      if(value){
-        tvShows.append(loading);
-    new DBService().getSearchResult(value).then(renderCard);
+    dbService.getSearchResult(value).then(renderCard);
     }
-    
-    
     searchFormInput.value = '';
 });
 
@@ -155,9 +169,31 @@ searchForm.addEventListener('submit', event => {
                 dropdown.classList.toggle('active');
                 leftMenu.classList.add('openMenu');
                 hamburger.classList.add('open');
-                
+
+            }
+
+            if(target.closest('#top-rated')){
+                dbService.getTopRated().then((response) => renderCard(response, target));
+
+            }
+            if(target.closest('#popular')){
+                dbService.getPopular().then((response) => renderCard(response, target));
+
+            }
+            if(target.closest('#today')){
+                dbService.getWeek().then((response) => renderCard(response, target));
+
+            }
+            if(target.closest('#week')){
+                dbService.getToday().then((response) => renderCard(response, target));
             }
             });
+
+
+            
+
+
+
 
         //открытие модального окна
 
@@ -170,7 +206,7 @@ searchForm.addEventListener('submit', event => {
             if(card){
                 
                 preloader.style.display = 'block';
-                new DBService().getTvShow(card.id)
+                dbService.getTvShow(card.id)
                     .then(({ 
                         poster_path : posterPath,
                         homepage,
