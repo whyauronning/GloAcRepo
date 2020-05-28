@@ -22,10 +22,11 @@ const leftMenu = document.querySelector('.left-menu'),
       dropdown = document.querySelectorAll('.dropdown'),
       tvShowsHead = document.querySelector('.tv-shows__head'),
       posterWrapper = document.querySelector('.poster__wrapper'),
-      modalContent = document.querySelector('.modal__content');
+      modalContent = document.querySelector('.modal__content'),
+      pagination = document.querySelector('.pagination');
 
 const loading = document.createElement('div');
-    loading.className = 'loading';
+      loading.className = 'loading';
 
     console.log(loading);
 
@@ -34,7 +35,6 @@ const loading = document.createElement('div');
 const  DBService = class {
     
     getData = async (url) => {
-        tvShows.append(loading);
         const res = await fetch(url);
         if (res.ok) {
             return res.json();
@@ -52,9 +52,13 @@ const  DBService = class {
     }
 
     getSearchResult = query => {
+        this.temp = `${SERVER}/search/tv?api_key=${API_KEY}&query=${query}&language=ru-RU`;
         return this.getData(`${SERVER}/search/tv?api_key=${API_KEY}&query=${query}&language=ru-RU`)
     }
-    
+    getNextPage = page => {
+        return this.getData(this.temp + '&page=' + page);
+    }
+
     getTvShow = id => {
         return this.getData(`${SERVER}/tv/${id}?api_key=${API_KEY}&language=ru-RU`)
     }
@@ -76,11 +80,18 @@ const  DBService = class {
     
 }
 
-
 const dbService = new DBService();
-// работа с ответом и разбор в цикле ФорИч
+
+
+
+
+// РАБОТА С ОТВЕТОМ 
 const renderCard = (response, target) => {
+
+    
     tvShowsList.textContent = '';
+
+
     console.log (response);
 
     if(!response.total_results) {
@@ -120,25 +131,30 @@ const renderCard = (response, target) => {
         <h4 class="tv-card__head">${title}</h4>
     </a>
         `;
-        
+        loading.remove();
         tvShowsList.append(card);
-        
     });
+
+    pagination.textContent = '';
+
+    if(response.total_pages > 1){
+        for (let i = 1; i <= response.total_pages; i++){
+            pagination.innerHTML += `<li><a href ="#" class="pages">${i}</a></li>`;
+        }
+    }
 };
 
 searchForm.addEventListener('submit', event => {
     event.preventDefault();
     const value = searchFormInput.value.trim();
      if(value){
+    tvShows.append(loading);   
     dbService.getSearchResult(value).then(renderCard);
     }
     searchFormInput.value = '';
 });
 
-// {
-// tvShows.append(loading);
-// new DBService().getTestData().then(renderCard);
-// }
+
 
 
 
@@ -147,7 +163,8 @@ searchForm.addEventListener('submit', event => {
         dropdown.forEach(item => {
             item.classList.remove('active');
         })
-    }
+    };
+
       hamburger.addEventListener('click', () => {
         leftMenu.classList.toggle('openMenu');
         hamburger.classList.toggle('open');
@@ -173,24 +190,30 @@ searchForm.addEventListener('submit', event => {
             }
 
             if(target.closest('#top-rated')){
+                tvShows.append(loading);
                 dbService.getTopRated().then((response) => renderCard(response, target));
 
             }
             if(target.closest('#popular')){
+                tvShows.append(loading);
                 dbService.getPopular().then((response) => renderCard(response, target));
 
             }
             if(target.closest('#today')){
+                tvShows.append(loading);
                 dbService.getWeek().then((response) => renderCard(response, target));
 
             }
             if(target.closest('#week')){
+                tvShows.append(loading);
                 dbService.getToday().then((response) => renderCard(response, target));
             }
-            });
-
-
             
+            if(target.closest('#search')){
+              tvShowsHead.textContent = '';
+              tvShowsList.textContent = '';   
+            }
+        });
 
 
 
@@ -276,6 +299,19 @@ searchForm.addEventListener('submit', event => {
     };
         tvShowsList.addEventListener('mouseover', changeImage);
         tvShowsList.addEventListener('mouseout', changeImage);
+
+
+
+        // Пагинация,  процесс работы над страницами
+        pagination.addEventListener('click', (event) =>{
+            event.preventDefault();
+            const target = event.target;
+
+            if(target.classList.contains('pages')){
+                tvShows.append(loading);
+                dbService.getNextPage(target.textContent).then(renderCard);
+            }
+        });
 
         
 
