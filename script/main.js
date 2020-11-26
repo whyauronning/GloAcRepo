@@ -3,7 +3,7 @@ const SERVER = 'https://api.themoviedb.org/3';
 const API_KEY = 'e2dfb7e2800e95f95b70a6e55e5f324e';
 
 
-// меню
+// Menu
 
 const leftMenu = document.querySelector('.left-menu'),
       hamburger = document.querySelector('.hamburger'),
@@ -85,7 +85,7 @@ const dbService = new DBService();
 
 
 
-// РАБОТА С ОТВЕТОМ 
+// Work with response 
 const renderCard = (response, target) => {
 
     
@@ -106,7 +106,7 @@ const renderCard = (response, target) => {
 
     response.results.forEach(item => {
 
-       // деструктуризация
+       // Destructurization
         const {
             backdrop_path : backdrop,
             name : title,
@@ -158,7 +158,7 @@ searchForm.addEventListener('submit', event => {
 
 
 
-      // открытие/закрытие меню
+      // Open/Close menu
     const closeDropDown = () => {
         dropdown.forEach(item => {
             item.classList.remove('active');
@@ -218,7 +218,7 @@ searchForm.addEventListener('submit', event => {
 
 
 
-        //открытие модального окна
+        //Opening modal window
 
         tvShowsList.addEventListener('click', event => {
             event.preventDefault();
@@ -273,7 +273,7 @@ searchForm.addEventListener('submit', event => {
             }
         });
         
-        //закрытие модального окна
+        //Closing modal window
 
         modal.addEventListener('click', event => {
             
@@ -302,7 +302,8 @@ searchForm.addEventListener('submit', event => {
 
 
 
-        // Пагинация,  процесс работы над страницами
+        // Pagination , work with pages
+
         pagination.addEventListener('click', (event) =>{
             event.preventDefault();
             const target = event.target;
